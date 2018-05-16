@@ -12,6 +12,9 @@ uint16_t I_REG; // 16 bit register, for storing memory addresses
 uint16_t STACK[16];
 uint8_t STACK_PTR;
 
+uint8_t DELAY_TIMER;
+uint8_t SOUND_TIMER;
+
 void cpu_init();
 void cpu_run();
 
