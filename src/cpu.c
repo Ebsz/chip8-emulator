@@ -8,27 +8,29 @@
 #include "screen.h"
 #include "instructions.h"
 
+// Executes a single instruction and advances the program counter
 static void execute();
+static void cpu_run();
 
 // Instructions are based in their most significant digit
 // Defined in instructions.h
 void (*op_base[0x10]) (uint16_t) = { 
-			op_zero, 	//0x0
-			op_jp, 		//0x1
-			op_call, 	//0x2
-			op_se, 		//0x3
-			op_sne, 	//0x4
-			op_se_reg, 	//0x5
-			op_ld, 		//0x6
-			op_add, 	//0x7
-			op_8, 		//0x8
-			op_9, 		//0x9
-			op_ld_i, 	//0xA
-			op_B, 		//0xB
-			op_rnd, 	//0xC
-			op_drw, 	//0xD
-			op_skp, 	//0xE
-			op_F, 		//0xF
+			op_zero,		//0x0
+			op_jp,			//0x1
+			op_call,		//0x2
+			op_se,			//0x3
+			op_sne,			//0x4
+			op_se_reg,		//0x5
+			op_ld,			//0x6
+			op_add,			//0x7
+			op_vx_vy,		//0x8
+			op_sne_vx_vy,	//0x9
+			op_ld_i, 		//0xA
+			op_jp_nnn_v0, 	//0xB
+			op_rnd,			//0xC
+			op_drw,			//0xD
+			op_skp,			//0xE
+			op_F,			//0xF
 };
 
 void cpu_init()
@@ -47,24 +49,40 @@ void cpu_init()
 	cpu_run();
 }
 
-// TODO: define as static, as it is only to be accessed within cpu.c?
-void cpu_run()
+static void cpu_run()
 {
-	printf("\n");
 	int running = 1;
 	SDL_Event e;
 
+	unsigned int prev_time = SDL_GetTicks();
+	unsigned int current_time = 0, delta = 0;
+
 	while(running) {
+		current_time = SDL_GetTicks();
+		delta += (current_time - prev_time);
+
+		prev_time = current_time;
+
+		if (delta > 1000/60 && (SOUND_TIMER+DELAY_TIMER > 0)) {
+			if (SOUND_TIMER > 0) {
+				SOUND_TIMER--;
+			}
+			if (DELAY_TIMER > 0) {
+				DELAY_TIMER--;
+			}
+		}
+
 		while(SDL_PollEvent(&e) != 0) {
 			if (e.type == SDL_QUIT) running = 0;
 			if (e.type == SDL_KEYDOWN && e.key.keysym.sym == SDLK_ESCAPE) running = 0;
 		}
 
 		execute();
+
+//		getchar();
 	}
 }
 
-// TODO: define as static, as it is only to be accessed within cpu.c?
 static void execute()
 {
 	uint8_t op1 = mem_read_byte(PC_REG++);
@@ -77,4 +95,3 @@ static void execute()
 
 	(*op_base[base]) (op);
 }
-

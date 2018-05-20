@@ -1,4 +1,3 @@
-
 #ifndef CPU_H
 #define CPU_H
 
@@ -16,6 +15,5 @@ uint8_t DELAY_TIMER;
 uint8_t SOUND_TIMER;
 
 void cpu_init();
-void cpu_run();
 
 #endif
