@@ -1,12 +1,10 @@
 #include "mem.h"
 #include <stdio.h>
 
-void mem_load_rom()
+void mem_load_rom(char* path)
 {
-	char* rom_loc = "examples/PONG";
-
 	FILE* rom;
-	rom = fopen(rom_loc, "rb");
+	rom = fopen(path, "rb");
 
 	if (rom == NULL) {
 		printf("Could not load ROM!");
@@ -14,10 +12,8 @@ void mem_load_rom()
 		fread(mem+0x200, sizeof(uint8_t) * 0x1000,1,rom);
 		printf("MEM OK!\n");	
 	}
-
 	fclose(rom);
 }
-
 
 uint8_t mem_read_byte(uint16_t addr)
 {
@@ -26,6 +22,16 @@ uint8_t mem_read_byte(uint16_t addr)
 		return 0x0;
 	}
 	return mem[addr];
+}
+
+//TODO: add checks for invalid addr
+void mem_write_byte(uint16_t addr, uint8_t byte)
+{
+	if (addr >= 0x1000) {
+		printf("Trying to access memory beyond 0x1000!");
+	} else {
+		mem[addr] = byte;
+	}
 }
 
 void print_mem()

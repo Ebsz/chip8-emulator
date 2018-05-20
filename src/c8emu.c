@@ -4,7 +4,9 @@
 
 int main()
 {
-	mem_load_rom();
+	char rom_path [] = "examples/PONG2"; 
+
+	mem_load_rom(rom_path);
 	screen_init();
 	
 	cpu_init();
