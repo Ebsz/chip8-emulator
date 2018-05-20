@@ -8,6 +8,11 @@
 #include "mem.h"
 #include "screen.h"
 
+void op_wkey(uint16_t op);
+void op_ld_i_vx();
+void op_ld_vx_i();
+
+// TODO: Move keyboard to its own file?
 int keyboard_map[16] = {
 	SDL_SCANCODE_X,		
 	SDL_SCANCODE_1,		
@@ -50,9 +55,7 @@ void op_jp(uint16_t op)
 // 2nnn - Call subroutine by incrementing stack, pushing pc, then setting pc to nnn
 void op_call(uint16_t op)
 {
-	if (STACK_PTR > 0) {
-		STACK_PTR++;
-	} 
+	STACK_PTR++;
 
 	STACK[STACK_PTR] = PC_REG;
 
@@ -111,7 +114,7 @@ void op_add(uint16_t op)
 }
 
 // 8xyn - Operations with Vx and Vy
-void op_8(uint16_t op)
+void op_vx_vy(uint16_t op)
 {
 	uint8_t n = op % 0x10;
 	uint8_t x = (op/0x100) % 0x10;
@@ -185,7 +188,7 @@ void op_8(uint16_t op)
 }
 
 // 9xy0 - Skip next instruction if Vx != Vy
-void op_9(uint16_t op)
+void op_sne_vx_vy(uint16_t op)
 {
 	uint8_t x = (op/0x100) % 0x10;
 	uint8_t y = (op/0x10) % 0x10;
@@ -203,11 +206,10 @@ void op_ld_i(uint16_t op)
 }
 
 // Bnnn - Jump to nnn + V0
-void op_B(uint16_t op)
+void op_jp_nnn_v0(uint16_t op)
 {
 	uint16_t n = op%0x1000;
 	PC_REG = n + GP_REG[0];
-
 }
 
 // Cxkk - Vx = Random byte AND kk
@@ -234,8 +236,6 @@ void op_drw(uint16_t op)
 	}
 
 	screen_draw_sprite(GP_REG[x], GP_REG[y], sprite);
-		
-	getchar();
 }
 
 // Exkk - Skip instruction if key is pressed/not pressed
@@ -258,7 +258,6 @@ void op_skp(uint16_t op)
 			PC_REG += 2;
 		}
 	}
-
 }
 
 // Fxkk
@@ -270,10 +269,12 @@ void op_F(uint16_t op)
 	// TODO: Split the cases into different functions
 	switch(kk) {
 		case 0x07: // Vx = DELAY_TIMER
-			GP_REG[x] = DELAY_TIMER;	
+			GP_REG[x] = DELAY_TIMER;
 			break;
 
-		case 0x0A: // Wait for key press, then store that value in Vx
+		case 0x0A: 
+			getchar();
+			op_wkey(op);
 			break;
 
 		case 0x15: // DELAY_TIMER = Vx
@@ -289,15 +290,42 @@ void op_F(uint16_t op)
 			break;
 
 		case 0x29: // I_REG = location for sprite of digit Vx
+			getchar();
+			printf("\t unimplemented");
 			break;
 		
 		case 0x33:
+			getchar();
+			printf("\t unimplemented");
 			break;
 		
-		case 0x55: // Store registers V0-Vx in mem, starting at I_REG
+		case 0x55: // Fx55
+			op_ld_i_vx();
 			break;
 
-		case 0x65: // Read registers V0-Vx from mem, starting at I_REG
+		case 0x65: // Fx65
+			op_ld_vx_i();
 			break;
+	}
+}
+// Fx0A - wait for key press, then store that value in Vx
+void op_wkey(uint16_t op)
+{
+	printf("\t unimplemented");
+}
+
+// Fx55 - Store registers V0-Vx in mem, starting at I_REG
+void op_ld_i_vx()
+{
+	for(int i = 0; i< 16; i++) {
+		mem_write_byte(I_REG+i, GP_REG[i]);
+	}
+}
+
+// Fx65 - Read registers V0-Vx from mem, starting at I_REG
+void op_ld_vx_i()
+{
+	for(int i = 0; i< 16; i++) {
+		GP_REG[i] = mem_read_byte(I_REG+i);
 	}
 }
