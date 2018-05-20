@@ -60,7 +60,6 @@ static void cpu_run()
 	while(running) {
 		current_time = SDL_GetTicks();
 		delta += (current_time - prev_time);
-
 		prev_time = current_time;
 
 		if (delta > 1000/60 && (SOUND_TIMER+DELAY_TIMER > 0)) {
@@ -71,7 +70,8 @@ static void cpu_run()
 				DELAY_TIMER--;
 			}
 		}
-
+		
+		// Handle events
 		while(SDL_PollEvent(&e) != 0) {
 			if (e.type == SDL_QUIT) running = 0;
 			if (e.type == SDL_KEYDOWN && e.key.keysym.sym == SDLK_ESCAPE) running = 0;
@@ -79,7 +79,8 @@ static void cpu_run()
 
 		execute();
 
-//		getchar();
+		screen_render();
+		getchar();
 	}
 }
 

@@ -1,7 +1,8 @@
 #include "screen.h"
 
 void draw_sprite_line(int x, int y, uint8_t l);
-void draw_pixel(int x, int y);
+void render_pixel(int x, int y);
+int screen_pixels[WINDOW_WIDTH][WINDOW_HEIGHT] = {0}; // defines every pixel on the screen: 0 = white, 1 = black
 
 void screen_init()
 {
@@ -23,42 +24,25 @@ void screen_init()
 	screen_clear();
 }
 
-void screen_clear()
+// TODO: implement with RenderFillRects() - should be faster
+void screen_render() 
 {
-	SDL_SetRenderDrawColor(renderer, 255,255,255,0);
 	SDL_RenderClear(renderer);	
-	
+
+	for (int i = 0; i < WINDOW_WIDTH; i++) {
+		for (int j = 0; j < WINDOW_HEIGHT; j++) {
+			if (screen_pixels[i][j] == 0) {
+				SDL_SetRenderDrawColor(renderer, 255, 255, 255, 0);
+			} else {
+				SDL_SetRenderDrawColor(renderer, 0, 0, 0, 0);
+			}
+				render_pixel(i,j);
+		}
+	}
 	SDL_RenderPresent(renderer);
 }
 
-// Draw a sprite at (x, y) 
-// a sprite is defined by a 8 bit by 15 array
-int screen_draw_sprite(int x, int y, uint8_t sprite[])
-{
-	SDL_SetRenderDrawColor(renderer, 0, 0, 0, 0);
-
-	// Iterate over each line in the sprite
-	for (int i = 0; i < SPRITE_SIZE; i++) {
-		if (sprite[i] != 0x0) {
-			draw_sprite_line(x, y+i, sprite[i]);
-		}
-	}
-
-	SDL_RenderPresent(renderer);
-}
-
-
-// Draw a single line in the sprite
-void draw_sprite_line(int x, int y, uint8_t line) 
-{
-	for (int i = 0; i < 8; i++) { // each bit in the line
-		if ((line >> (7-i) ) & 1) { // get bit
-			draw_pixel(x+i, y);
-		}
-	}
-}
-
-void draw_pixel (int x, int y)
+void render_pixel (int x, int y)
 {
 	SDL_Rect r;
 	r.x = x* WINDOW_SCALE;
@@ -68,3 +52,35 @@ void draw_pixel (int x, int y)
 
 	SDL_RenderFillRect(renderer, &r);
 }
+
+void screen_clear()
+{
+	for (int i = 0; i < WINDOW_WIDTH; i++) {
+		for (int j = 0; j < WINDOW_HEIGHT; j++) {
+			screen_pixels[i][j] = 0;
+		}
+	}
+}
+
+// Draw a sprite at (x, y) 
+// a sprite is defined by a 8 bit by 15 array
+int screen_draw_sprite(int x, int y, uint8_t sprite[])
+{
+	// Iterate over each line in the sprite
+	for (int i = 0; i < SPRITE_SIZE; i++) {
+		if (sprite[i] != 0x0) {
+			draw_sprite_line(x, y+i, sprite[i]);
+		}
+	}
+}
+
+// Draw a single line in the sprite
+void draw_sprite_line(int x, int y, uint8_t line) 
+{
+	for (int i = 0; i < 8; i++) { // each bit in the line
+		if ((line >> (7-i) ) & 1) { // get bit
+			screen_pixels[x+i][y] =1;
+		}
+	}
+}
+

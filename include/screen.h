@@ -11,13 +11,14 @@
 
 #define SPRITE_SIZE 15
 
-SDL_Window* window;
-SDL_Renderer* renderer;
-
 void screen_init();
-void screen_clear();
+void screen_render();
 
 // Draw sprite on screen - return 0 if no collision, 1 if collision
 int screen_draw_sprite(int x, int y, uint8_t sprite[]);
+void screen_clear();
+
+SDL_Window* window;
+SDL_Renderer* renderer;
 
 #endif
