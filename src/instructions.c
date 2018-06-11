@@ -1,14 +1,20 @@
 #include <stdio.h>
 #include <SDL2/SDL.h>
 #include <stdlib.h> // srand(), rand()
+#include <stdbool.h>
 #include <time.h>	// time()
 
 #include "instructions.h"
-#include "cpu.h"
-#include "mem.h"
 #include "screen.h"
 
+#include "sprites.h"
+extern uint16_t sprite_addr[16];
+
+#include "cpu.h"
+#include "mem.h"
+
 void op_wkey(uint16_t op);
+void op_bcd(uint16_t op);
 void op_ld_i_vx();
 void op_ld_vx_i();
 
@@ -223,8 +229,13 @@ void op_rnd(uint16_t op)
 }
 
 // Dxyn - draw n byte sprite starting at I_REG, at (Vx, Vy)
+// If any pixels are erased by the drawing, VF is set, otherwise it is unset
 void op_drw(uint16_t op)
 {
+//	for (int i=0; i<16; i++) {
+//		printf("V%x: %x\t", i, GP_REG[i]);
+//	}
+
 	uint8_t n = op %0x10;
 	uint8_t x = (op/0x100)%0x10;
 	uint8_t y = (op/0x10)%0x10;
@@ -235,7 +246,13 @@ void op_drw(uint16_t op)
 		sprite[i] = mem_read_byte(I_REG+i);
 	}
 
-	screen_draw_sprite(GP_REG[x], GP_REG[y], sprite);
+	bool erased = screen_draw_sprite(GP_REG[x], GP_REG[y], sprite);
+
+	if (erased) {
+		GP_REG[0xF] = 0x1;
+	} else {
+		GP_REG[0xF] = 0x0;
+	}
 }
 
 // Exkk - Skip instruction if key is pressed/not pressed
@@ -273,7 +290,6 @@ void op_F(uint16_t op)
 			break;
 
 		case 0x0A: 
-			getchar();
 			op_wkey(op);
 			break;
 
@@ -290,13 +306,11 @@ void op_F(uint16_t op)
 			break;
 
 		case 0x29: // I_REG = location for sprite of digit Vx
-			getchar();
-			printf("\t unimplemented");
+			I_REG = sprite_addr[GP_REG[x]];
 			break;
 		
-		case 0x33:
-			getchar();
-			printf("\t unimplemented");
+		case 0x33: // Fx33 
+			op_bcd(op);
 			break;
 		
 		case 0x55: // Fx55
@@ -311,7 +325,29 @@ void op_F(uint16_t op)
 // Fx0A - wait for key press, then store that value in Vx
 void op_wkey(uint16_t op)
 {
-	printf("\t unimplemented");
+	uint8_t x = (op/0x100)%0x10;
+
+	SDL_PumpEvents(); // Update state array
+	const Uint8* state = SDL_GetKeyboardState(NULL);
+
+	for (int i=0; i < 0x10; i++) {
+		if (state[keyboard_map[i]]) {
+			GP_REG[x] = i;
+			return;
+		}
+	}
+	PC_REG -= 2;
+}
+
+// Fx33 - Store BCD of Vx in I, I+1, I+2
+void op_bcd(uint16_t op)
+{
+	uint8_t x = (op/0x100)%0x10;
+	uint8_t n = GP_REG[x];
+
+	mem_write_byte(I_REG, (n/100));
+	mem_write_byte(I_REG+1, (n%100)/10);
+	mem_write_byte(I_REG+2, (n%10));
 }
 
 // Fx55 - Store registers V0-Vx in mem, starting at I_REG
