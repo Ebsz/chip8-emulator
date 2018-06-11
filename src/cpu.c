@@ -10,7 +10,6 @@
 
 // Executes a single instruction and advances the program counter
 static void execute();
-static void cpu_run();
 
 // Instructions are based in their most significant digit
 // Defined in instructions.h
@@ -45,21 +44,21 @@ void cpu_init()
 	DELAY_TIMER = 0;
 
 	printf("CPU OK!\n");
-
-	cpu_run();
 }
 
-static void cpu_run()
+void cpu_run()
 {
 	int running = 1;
 	SDL_Event e;
 
 	unsigned int prev_time = SDL_GetTicks();
-	unsigned int current_time = 0, delta = 0;
+	unsigned int current_time = 0, delta = 0, exec_time = 0;
 
 	while(running) {
 		current_time = SDL_GetTicks();
 		delta += (current_time - prev_time);
+		exec_time += (current_time - prev_time);
+
 		prev_time = current_time;
 
 		if (delta > 1000/60 && (SOUND_TIMER+DELAY_TIMER > 0)) {
@@ -69,7 +68,13 @@ static void cpu_run()
 			if (DELAY_TIMER > 0) {
 				DELAY_TIMER--;
 			}
+			delta = 0;
 		}
+
+//		if (exec_time > 1000/60) {
+			exec_time = 0;
+			execute();
+//		}
 		
 		// Handle events
 		while(SDL_PollEvent(&e) != 0) {
@@ -77,10 +82,7 @@ static void cpu_run()
 			if (e.type == SDL_KEYDOWN && e.key.keysym.sym == SDLK_ESCAPE) running = 0;
 		}
 
-		execute();
-
 		screen_render();
-		getchar();
 	}
 }
 
@@ -90,7 +92,9 @@ static void execute()
 	uint8_t op2 = mem_read_byte(PC_REG++);
 	uint16_t op = op1*0x100 + op2;
 
-	printf("%x\n", op);
+//	printf("%x\n", op);
+	printf("sound_timer: %d\n", SOUND_TIMER);
+	printf("delay_timer: %d\n", DELAY_TIMER);
 
 	uint8_t base = op/0x1000;
 
