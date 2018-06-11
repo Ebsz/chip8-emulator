@@ -2,6 +2,7 @@
 #define SCREEN_H
 
 #include <SDL2/SDL.h>
+#include <stdbool.h>
 
 #define WINDOW_WIDTH 	64
 #define WINDOW_HEIGHT 	32
@@ -14,8 +15,8 @@
 void screen_init();
 void screen_render();
 
-// Draw sprite on screen - return 0 if no collision, 1 if collision
-int screen_draw_sprite(int x, int y, uint8_t sprite[]);
+// Draw sprite on screen - returns true on collision
+bool screen_draw_sprite(int x, int y, uint8_t sprite[]);
 void screen_clear();
 
 SDL_Window* window;

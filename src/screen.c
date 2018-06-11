@@ -1,8 +1,9 @@
 #include "screen.h"
 
-void draw_sprite_line(int x, int y, uint8_t l);
+bool draw_sprite_line(int x, int y, uint8_t l);
 void render_pixel(int x, int y);
 int screen_pixels[WINDOW_WIDTH][WINDOW_HEIGHT] = {0}; // defines every pixel on the screen: 0 = white, 1 = black
+void check_pixel_bounds(int* x, int* y);
 
 void screen_init()
 {
@@ -64,23 +65,46 @@ void screen_clear()
 
 // Draw a sprite at (x, y) 
 // a sprite is defined by a 8 bit by 15 array
-int screen_draw_sprite(int x, int y, uint8_t sprite[])
+// TODO: implement checking and returning whether anything was removed
+bool screen_draw_sprite(int x, int y, uint8_t sprite[])
 {
+	bool erased = false;
 	// Iterate over each line in the sprite
 	for (int i = 0; i < SPRITE_SIZE; i++) {
 		if (sprite[i] != 0x0) {
-			draw_sprite_line(x, y+i, sprite[i]);
+			if (draw_sprite_line(x, y+i, sprite[i])) {
+				erased = true;
+			}
 		}
 	}
+	return erased;
 }
 
 // Draw a single line in the sprite
-void draw_sprite_line(int x, int y, uint8_t line) 
+bool draw_sprite_line(int x, int y, uint8_t line) 
 {
+	bool erased = false;
 	for (int i = 0; i < 8; i++) { // each bit in the line
 		if ((line >> (7-i) ) & 1) { // get bit
-			screen_pixels[x+i][y] =1;
+			check_pixel_bounds(&x, &y);
+			if (screen_pixels[x+i][y] == 0) {
+				screen_pixels[x+i][y] = 1;
+				erased = true;
+			} else {
+				screen_pixels[x+i][y] = 0;
+			}
 		}
 	}
+	return erased;
 }
 
+void check_pixel_bounds(int* x, int* y)
+{
+	if (*x > WINDOW_WIDTH) {
+		*x = *x % WINDOW_WIDTH;
+	}
+
+	if (*y > WINDOW_HEIGHT) {
+		*y = *y% WINDOW_HEIGHT;
+	}
+}
