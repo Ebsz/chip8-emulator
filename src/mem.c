@@ -1,8 +1,12 @@
 #include "mem.h"
+#include "sprites.h"
+
 #include <stdio.h>
 
-void mem_load_rom(char* path)
+void mem_init(char* path)
 {
+	load_sprites();
+
 	FILE* rom;
 	rom = fopen(path, "rb");
 
