@@ -1,23 +1,27 @@
 CC = gcc
-
-# compiler flags
-CCFLAGS = 
-#CCFLAGS += -O3 # Optimize for speed
-
-OBJS = src/*.c
-INC = -I include
-
+CFLAGS = -I include
 LIB = -lSDL2
+VPATH = build src
 
+SRCDIR = src
+OUTDIR = build
 TARGET = c8emu
 
-all: exec
 
-test: CCFLAGS += -Wall -Wextra -pedantic
-test: exec
+SRC := $(wildcard $(SRCDIR)/*.c)
+OBJ := $(patsubst $(SRCDIR)/%.c, $(OUTDIR)/%.o, $(SRC))
 
-debug: CCFLAGS += -g
-debug: exec
+.PHONY: all clean
 
-exec:
-	$(CC) $(CCFLAGS) $(OBJS) $(INC) $(LIB) -o $(TARGET)
+all: $(OBJ)
+	$(CC) -o $(TARGET) $(OBJ) $(LIB)
+
+$(OBJ) : $(OUTDIR)/%.o : $(SRCDIR)/%.c
+	@mkdir -p $(OUTDIR)
+	$(CC) $(CFLAGS) -c -o $@ $<
+
+clean:
+	@-rm -rf $(TARGET)
+	@-rm -rf $(OUTDIR)
+
+print-% : ; @echo $* = $($*)
