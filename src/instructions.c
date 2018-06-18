@@ -15,8 +15,8 @@ extern uint16_t sprite_addr[16];
 
 void op_wkey(uint16_t op);
 void op_bcd(uint16_t op);
-void op_ld_i_vx();
-void op_ld_vx_i();
+void op_ld_i_vx(uint16_t op);
+void op_ld_vx_i(uint16_t op);
 
 // TODO: Move keyboard to its own file?
 int keyboard_map[16] = {
@@ -283,7 +283,6 @@ void op_F(uint16_t op)
 	uint8_t x = (op/0x100)%0x10;
 	uint8_t kk = op%0x100;
 
-	// TODO: Split the cases into different functions
 	switch(kk) {
 		case 0x07: // Vx = DELAY_TIMER
 			GP_REG[x] = DELAY_TIMER;
@@ -314,14 +313,15 @@ void op_F(uint16_t op)
 			break;
 		
 		case 0x55: // Fx55
-			op_ld_i_vx();
+			op_ld_i_vx(op);
 			break;
 
 		case 0x65: // Fx65
-			op_ld_vx_i();
+			op_ld_vx_i(op);
 			break;
 	}
 }
+
 // Fx0A - wait for key press, then store that value in Vx
 void op_wkey(uint16_t op)
 {
@@ -351,17 +351,21 @@ void op_bcd(uint16_t op)
 }
 
 // Fx55 - Store registers V0-Vx in mem, starting at I_REG
-void op_ld_i_vx()
+void op_ld_i_vx(uint16_t op)
 {
-	for(int i = 0; i< 16; i++) {
+	uint8_t x = (op/0x100)%0x10;
+	
+	for(int i = 0; i< x; i++) {
 		mem_write_byte(I_REG+i, GP_REG[i]);
 	}
 }
 
 // Fx65 - Read registers V0-Vx from mem, starting at I_REG
-void op_ld_vx_i()
+void op_ld_vx_i(uint16_t op)
 {
-	for(int i = 0; i< 16; i++) {
+	uint8_t x = (op/0x100)%0x10;
+
+	for(int i = 0; i< x; i++) {
 		GP_REG[i] = mem_read_byte(I_REG+i);
 	}
 }

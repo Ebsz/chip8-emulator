@@ -52,12 +52,11 @@ void cpu_run()
 	SDL_Event e;
 
 	unsigned int prev_time = SDL_GetTicks();
-	unsigned int current_time = 0, delta = 0, exec_time = 0;
+	unsigned int current_time = 0, delta = 0;
 
 	while(running) {
 		current_time = SDL_GetTicks();
 		delta += (current_time - prev_time);
-		exec_time += (current_time - prev_time);
 
 		prev_time = current_time;
 
@@ -71,10 +70,7 @@ void cpu_run()
 			delta = 0;
 		}
 
-//		if (exec_time > 1000/60) {
-			exec_time = 0;
-			execute();
-//		}
+		execute();
 		
 		// Handle events
 		while(SDL_PollEvent(&e) != 0) {
@@ -93,8 +89,10 @@ static void execute()
 	uint16_t op = op1*0x100 + op2;
 
 //	printf("%x\n", op);
-	printf("sound_timer: %d\n", SOUND_TIMER);
-	printf("delay_timer: %d\n", DELAY_TIMER);
+//	print_registers();
+
+//	printf("sound_timer: %d\n", SOUND_TIMER);
+//	printf("delay_timer: %d\n", DELAY_TIMER);
 
 	uint8_t base = op/0x1000;
 
