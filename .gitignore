@@ -1,7 +1,8 @@
-# binaries
+# binaries, build files
 a.out
 c8emu
+/build
+*.o
+*.exe
 
-# other
-/testing
-
+/tmp

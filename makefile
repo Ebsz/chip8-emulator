@@ -1,5 +1,5 @@
 CC = gcc
-CFLAGS = -I include
+CFLAGS = -I include -Wall -Werror
 LIB = -lSDL2
 VPATH = build src
 
