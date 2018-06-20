@@ -8,7 +8,6 @@
 #include "screen.h"
 #include "instructions.h"
 
-// Executes a single instruction and advances the program counter
 static void execute();
 
 // Instructions are based in their most significant digit
@@ -52,11 +51,12 @@ void cpu_run()
 	SDL_Event e;
 
 	unsigned int prev_time = SDL_GetTicks();
-	unsigned int current_time = 0, delta = 0;
+	unsigned int current_time = 0, delta = 0, cpu_time = 0;
 
 	while(running) {
 		current_time = SDL_GetTicks();
 		delta += (current_time - prev_time);
+		cpu_time += (current_time - prev_time);
 
 		prev_time = current_time;
 
@@ -69,8 +69,12 @@ void cpu_run()
 			}
 			delta = 0;
 		}
-
-		execute();
+		
+		// execution is restricted to at most once every 1 ms
+		if (cpu_time > 1) {
+			execute();
+			cpu_time = 0;
+		}
 		
 		// Handle events
 		while(SDL_PollEvent(&e) != 0) {
@@ -79,22 +83,20 @@ void cpu_run()
 		}
 
 		screen_render();
+
+//		getchar();
 	}
 }
 
+// Execute a single instruction and advance the program counter 
 static void execute()
 {
 	uint8_t op1 = mem_read_byte(PC_REG++);
 	uint8_t op2 = mem_read_byte(PC_REG++);
 	uint16_t op = op1*0x100 + op2;
 
-//	printf("%x\n", op);
-//	print_registers();
-
-//	printf("sound_timer: %d\n", SOUND_TIMER);
-//	printf("delay_timer: %d\n", DELAY_TIMER);
-
 	uint8_t base = op/0x1000;
 
+	// execute instruction
 	(*op_base[base]) (op);
 }
