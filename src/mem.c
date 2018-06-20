@@ -1,9 +1,8 @@
+#include <stdio.h>
 #include "mem.h"
 #include "sprites.h"
 
-#include <stdio.h>
-
-void mem_init(char* path)
+bool mem_init(char* path)
 {
 	load_sprites();
 
@@ -11,12 +10,16 @@ void mem_init(char* path)
 	rom = fopen(path, "rb");
 
 	if (rom == NULL) {
-		printf("Could not load ROM!");
-	} else {
-		fread(mem+0x200, sizeof(uint8_t) * 0x1000,1,rom);
-		printf("MEM OK!\n");	
+		printf("Could not load file!\n");
+		return false;
 	}
+
+	// Files are loaded starting at 0x200, as expected by most programs
+	fread(mem+0x200, sizeof(uint8_t) * 0x1000,1,rom);
 	fclose(rom);
+
+	printf("MEM OK!\n");
+	return true;
 }
 
 uint8_t mem_read_byte(uint16_t addr)
@@ -32,7 +35,7 @@ uint8_t mem_read_byte(uint16_t addr)
 void mem_write_byte(uint16_t addr, uint8_t byte)
 {
 	if (addr >= 0x1000) {
-		printf("Trying to access memory beyond 0x1000!");
+		printf("Trying to write to memory beyond 0x1000!");
 	} else {
 		mem[addr] = byte;
 	}
