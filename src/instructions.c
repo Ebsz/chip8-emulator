@@ -14,6 +14,7 @@ extern uint16_t sprite_addr[16];
 #include "mem.h"
 
 void op_wkey(uint16_t op);
+void op_ld_sprite(uint16_t op);
 void op_bcd(uint16_t op);
 void op_ld_i_vx(uint16_t op);
 void op_ld_vx_i(uint16_t op);
@@ -305,7 +306,7 @@ void op_F(uint16_t op)
 			break;
 
 		case 0x29: // I_REG = location for sprite of digit Vx
-			I_REG = sprite_addr[GP_REG[x]];
+			op_ld_sprite(op);
 			break;
 		
 		case 0x33: // Fx33 
@@ -337,6 +338,19 @@ void op_wkey(uint16_t op)
 		}
 	}
 	PC_REG -= 2;
+}
+
+// Fx29
+void op_ld_sprite(uint16_t op)
+{
+	uint8_t x = (op/0x100)%0x10;
+
+	if (GP_REG[x] > 0xF) {
+		printf("Error: loading sprite beyond OxF");
+		return;
+	}
+
+	I_REG = sprite_addr[GP_REG[x]];
 }
 
 // Fx33 - Store BCD of Vx in I, I+1, I+2
