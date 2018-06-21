@@ -363,9 +363,11 @@ void op_ld_i_vx(uint16_t op)
 {
 	uint8_t x = (op/0x100)%0x10;
 	
-	for(int i = 0; i< x; i++) {
+	int i = 0;
+	do {
 		mem_write_byte(I_REG+i, GP_REG[i]);
-	}
+
+	} while (++i <= x);
 }
 
 // Fx65 - Read registers V0-Vx from mem, starting at I_REG
@@ -373,7 +375,8 @@ void op_ld_vx_i(uint16_t op)
 {
 	uint8_t x = (op/0x100)%0x10;
 
-	for(int i = 0; i< x; i++) {
+	int i = 0;
+	do {
 		GP_REG[i] = mem_read_byte(I_REG+i);
-	}
+	} while (++i <= x);
 }
