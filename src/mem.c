@@ -2,6 +2,8 @@
 #include "mem.h"
 #include "sprites.h"
 
+uint8_t mem[0x1000] = {0};
+
 bool mem_init(char* path)
 {
 	load_sprites();
@@ -41,12 +43,3 @@ void mem_write_byte(uint16_t addr, uint8_t byte)
 	}
 }
 
-void print_mem()
-{
-	for (int i = 0; i< 0x100; i++) {
-		for (int j = 0; j < 0x10; j++) {
-			printf("%x ", mem[j+0x10*i]);
-		}
-		printf("\n");
-	}
-}

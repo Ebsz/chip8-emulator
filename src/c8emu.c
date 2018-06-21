@@ -16,9 +16,8 @@ int main(int argc, char* argv[])
 	}
 	
 	screen_init();
-
 	cpu_init();
-	cpu_run();
 
+	cpu_run();
 	return 0;
 }

@@ -127,7 +127,6 @@ void op_vx_vy(uint16_t op)
 	uint8_t x = (op/0x100) % 0x10;
 	uint8_t y = (op/0x10) % 0x10;
 
-	// TODO: Split the cases into different functions
 	switch (n) {
 		case 0: 	// 8xy0 - Vx = Vy
 			GP_REG[x] = GP_REG[y];
@@ -171,7 +170,6 @@ void op_vx_vy(uint16_t op)
 			}
 			
 			GP_REG[x] /= 2;
-
 			break;
 
 		case 7:		// 8xy7 - Vx = Vy - Vx
@@ -233,15 +231,11 @@ void op_rnd(uint16_t op)
 // If any pixels are erased by the drawing, VF is set, otherwise it is unset
 void op_drw(uint16_t op)
 {
-//	for (int i=0; i<16; i++) {
-//		printf("V%x: %x\t", i, GP_REG[i]);
-//	}
-
 	uint8_t n = op %0x10;
 	uint8_t x = (op/0x100)%0x10;
 	uint8_t y = (op/0x10)%0x10;
 	
-	uint8_t sprite[SPRITE_SIZE] = {0};
+	uint8_t sprite[SPRITE_MAX_SIZE] = {0};
 
 	for(int i = 0; i < n; i++) {
 		sprite[i] = mem_read_byte(I_REG+i);

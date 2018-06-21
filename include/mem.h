@@ -4,12 +4,13 @@
 #include <stdint.h>
 #include <stdbool.h>
 
-uint8_t mem[0x1000]; // Main memory
-
+// Initialize memory with program given path; returns true on success
 bool mem_init(char* path);
-uint8_t mem_read_byte(uint16_t addr);
-void mem_write_byte(uint16_t addr, uint8_t byte);
 
-void print_mem();
+// Read a single byte from memory at address addr
+uint8_t mem_read_byte(uint16_t addr);
+
+// Write a single byte to memory to addr
+void mem_write_byte(uint16_t addr, uint8_t byte);
 
 #endif

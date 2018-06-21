@@ -83,8 +83,10 @@ void cpu_run()
 		}
 
 		screen_render();
-
-//		getchar();
+		
+		#ifdef DEBUG
+		getchar();
+		#endif
 	}
 }
 
@@ -97,6 +99,15 @@ static void execute()
 
 	uint8_t base = op/0x1000;
 
+	#ifdef DEBUG
+	printf("%x\n", op);
+	for (int i = 0; i<16;i++) {
+		printf("V%x: %x  ", i, GP_REG[i]);
+	}
+	printf("\n");
+	#endif
+
 	// execute instruction
 	(*op_base[base]) (op);
 }
+
