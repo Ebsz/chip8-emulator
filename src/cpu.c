@@ -7,6 +7,7 @@
 #include "mem.h"
 #include "screen.h"
 #include "instructions.h"
+#include "debug_window.h"
 
 static void execute();
 
@@ -76,17 +77,14 @@ void cpu_run()
 			cpu_time = 0;
 		}
 		
-		// Handle events
+		// Handle window events
 		while(SDL_PollEvent(&e) != 0) {
-			if (e.type == SDL_QUIT) running = 0;
-			if (e.type == SDL_KEYDOWN && e.key.keysym.sym == SDLK_ESCAPE) running = 0;
+			if ((e.type == SDL_QUIT) || 
+				(e.type == SDL_KEYDOWN && e.key.keysym.sym == SDLK_ESCAPE)) {
+					running = 0;
+				}
 		}
-
 		screen_render();
-		
-		#ifdef DEBUG
-		getchar();
-		#endif
 	}
 }
 
@@ -98,16 +96,12 @@ static void execute()
 	uint16_t op = op1*0x100 + op2;
 
 	uint8_t base = op/0x1000;
-
+	
 	#ifdef DEBUG
-	printf("%x\n", op);
-	for (int i = 0; i<16;i++) {
-		printf("V%x: %x  ", i, GP_REG[i]);
-	}
-	printf("\n");
+	dbwin_update(op);
 	#endif
 
 	// execute instruction
 	(*op_base[base]) (op);
+	
 }
-

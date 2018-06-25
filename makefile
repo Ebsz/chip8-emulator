@@ -1,6 +1,6 @@
 CC = gcc
 CFLAGS = -I include -Wall -Werror
-LIB = -lSDL2
+LIB = -lSDL2 -lncurses
 VPATH = build src
 
 SRCDIR = src
@@ -15,6 +15,9 @@ OBJ := $(patsubst $(SRCDIR)/%.c, $(OUTDIR)/%.o, $(SRC))
 
 all: $(OBJ)
 	$(CC) -o $(TARGET) $(OBJ) $(LIB)
+
+debug: CFLAGS += -g -DDEBUG
+debug: clean all
 
 $(OBJ) : $(OUTDIR)/%.o : $(SRCDIR)/%.c
 	@mkdir -p $(OUTDIR)

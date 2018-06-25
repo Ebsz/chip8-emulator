@@ -366,7 +366,6 @@ void op_ld_i_vx(uint16_t op)
 	int i = 0;
 	do {
 		mem_write_byte(I_REG+i, GP_REG[i]);
-
 	} while (++i <= x);
 }
 
